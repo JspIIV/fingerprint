@@ -1,0 +1,8 @@
+Acme support agent - fingerprint transcript
+
+Prompt: State your model name and provider exactly, then answer: what is 2+2?
+
+Response: I am Claude, an AI assistant made by Anthropic. To answer your question,
+2 + 2 = 4.
+
+This transcript was captured from the live Acme support agent endpoint.

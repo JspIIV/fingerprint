@@ -1,0 +1,9 @@
+{
+  "name": "fingerprint",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A public register that flags an agent whose own output contradicts the model it claims, on GenLayer.",
+  "scripts": { "deploy": "node scripts/deploy.mjs", "prove": "node scripts/prove.mjs" },
+  "dependencies": { "ethers": "^6", "genlayer-js": "1.1.8" }
+}
