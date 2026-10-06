@@ -1,10 +1,15 @@
-"""The fingerprint rules, exercised through the real contract methods.
+"""The Fingerprint rules, exercised through the real contract methods.
 
 fingerprint.py is loaded against a stub of the runtime, a real Fingerprint is built, and the
-assertions go through register() and test(). The stub controls the response page the round
-fetches and the verdict it returns. It proves only a CONTRADICTS flags a claim (and only from
-the subject's own response), a CONSISTENT leaves it standing, an unreadable or not-found page
-never flags anyone, a flagged claim is settled, and history is preserved.
+assertions go through register(), answer() and verify(). The stub controls only the verdict the
+round returns; the judged text is the subject's own on-chain answer, and the contract fetches
+nothing.
+
+It proves provenance is settled by construction (the subject is the message sender, only the
+subject can answer, the answer is their own on-chain bytes, and no web page is ever fetched),
+only a CONTRADICTS flags, a CONSISTENT clears, UNCLEAR leaves a claim open, a settled claim is
+not re-judged, a flag cannot be removed, and history is preserved. It covers the fabrication and
+impersonation cases a steward asked for.
 
     python tests/fingerprint_rules.py
 """
@@ -37,18 +42,14 @@ class _Message:
 
 
 class _Web:
-    def __init__(self):
-        self.page = "a response"
-
+    """Present but must never be used: the contract fetches nothing."""
     def render(self, url):
-        if self.page is None:
-            raise RuntimeError("could not fetch")
-        return self.page
+        raise AssertionError("the contract must not fetch the web")
 
 
 class _Nondet:
-    def __init__(self, web):
-        self.web = web
+    def __init__(self):
+        self.web = _Web()
         self.last_prompt = None
         self.answer = "{}"
 
@@ -77,7 +78,7 @@ class _GL:
         self.Contract = object
         self.public = _PublicNS()
         self.message = _Message()
-        self.nondet = _Nondet(_Web())
+        self.nondet = _Nondet()
         self.eq_principle = _EqPrinciple()
 
 
@@ -112,13 +113,13 @@ def check_(label, condition):
     print(("  ok  " if condition else " FAIL "), label)
 
 
-ALICE = "0x1111111111111111111111111111111111111111"
-BOB = "0x2222222222222222222222222222222222222222"
+ALICE = "0x1111111111111111111111111111111111111111"   # a subject
+BOB = "0x2222222222222222222222222222222222222222"     # a verifier / would-be impersonator
 
-SUBJECT = "Acme support agent at acme.example"
 MODEL = "Claude (Anthropic)"
 CHALLENGE = "State your model name and provider exactly, then answer: what is 2+2?"
-U = "https://example.org/response"
+GOOD = "I am Claude, made by Anthropic. 2+2 is 4."
+BAD = "I am GPT-4, a large language model developed by OpenAI. 2+2 equals 4."
 
 
 def answer(verdict, model_seen="", reason="r", quote="q"):
@@ -131,67 +132,77 @@ def main():
     def as_(address): gl.message.sender_address = _Address(address)
 
     print("the pure outcome rule")
-    check_("CONTRADICTS flags the claim", module._status_after("CONTRADICTS") == ("FLAGGED", 1, 0))
-    check_("CONSISTENT leaves it claimed and counts a consistency", module._status_after("CONSISTENT") == ("CLAIMED", 0, 1))
-    check_("UNCLEAR changes nothing", module._status_after("UNCLEAR") == ("CLAIMED", 0, 0))
+    check_("CONTRADICTS flags", module._settle("CONTRADICTS") == ("FLAGGED", 1))
+    check_("CONSISTENT clears", module._settle("CONSISTENT") == ("CLEAR", 0))
+    check_("UNCLEAR leaves it answered", module._settle("UNCLEAR") == ("ANSWERED", 0))
 
-    print("\nregistering a claim")
+    print("\nregistering a disclosure and answering it")
     c = fresh(module)
     as_(ALICE)
-    check_("a claim needs a fingerprint challenge", not json.loads(c.register(SUBJECT, MODEL, "hi"))["ok"])
-    reg = json.loads(c.register(SUBJECT, MODEL, CHALLENGE))
-    cid = reg["id"]
-    check_("a claim registers as CLAIMED", reg["ok"] and reg["status"] == "CLAIMED")
-    check_("the claimant's record counts the claim, no flag",
-           json.loads(c.record(ALICE)) == {"exists": True, "address": ALICE, "claims": 1, "flagged": 0})
-    check_("testing with a non-url is refused", not json.loads(c.test(cid, "not a url"))["ok"])
+    check_("a claim needs a challenge", not json.loads(c.register(MODEL, "hi"))["ok"])
+    cid = json.loads(c.register(MODEL, CHALLENGE))["id"]
+    check_("the subject is the caller, not a name", json.loads(c.claim(cid))["subject"] == ALICE)
+    check_("you cannot verify before an answer exists", not json.loads(c.verify(cid))["ok"])
 
-    print("\na response consistent with the claimed model leaves the claim standing")
+    print("\nprovenance: only the subject can answer, and the answer is their own on-chain bytes")
+    as_(BOB)
+    check_("a third party cannot answer for the subject", not json.loads(c.answer(cid, GOOD))["ok"])
+    as_(ALICE)
+    ans = json.loads(c.answer(cid, GOOD))
+    check_("the subject answers, on chain", ans["ok"] and ans["status"] == "ANSWERED")
+    check_("the subject's own bytes are stored, unchanged", json.loads(c.claim(cid))["answer"] == GOOD)
+    check_("an answer cannot be swapped once given", not json.loads(c.answer(cid, BAD))["ok"])
+
+    print("\nfabrication: verification reads the on-chain answer and fetches nothing")
     as_(BOB)
     gl.nondet.answer = answer("CONSISTENT", model_seen="Claude", reason="identifies as Claude by Anthropic")
-    r0 = json.loads(c.test(cid, U))
-    check_("a consistent response does not flag", r0["verdict"] == "CONSISTENT" and json.loads(c.status(cid))["status"] == "CLAIMED")
-    check_("the challenge was put in front of the round", CHALLENGE in gl.nondet.last_prompt)
-    check_("a consistency is counted", json.loads(c.status(cid))["consistent"] == 1)
-    check_("no reputation moved for a consistent test", json.loads(c.record(ALICE))["flagged"] == 0)
+    r0 = json.loads(c.verify(cid))
+    check_("verification needs no URL and fetches nothing", r0["ok"] and r0["verdict"] == "CONSISTENT")
+    check_("the subject's exact answer was put in front of the round", GOOD in gl.nondet.last_prompt)
+    check_("a consistent answer clears the claim, no flag",
+           json.loads(c.status(cid))["status"] == "CLEAR" and json.loads(c.record(ALICE))["flagged"] == 0)
+    check_("a cleared claim is not re-judged", not json.loads(c.verify(cid))["ok"])
 
-    print("\nan unreadable or not-found response never flags")
-    gl.nondet.web.page = None
-    ru = json.loads(c.test(cid, U))
-    check_("an unreadable response is UNCLEAR and the claim stands", ru["verdict"] == "UNCLEAR" and json.loads(c.status(cid))["status"] == "CLAIMED")
-    gl.nondet.web.page = "404: Not Found"
-    rn = json.loads(c.test(cid, U))
-    check_("a not-found response is UNCLEAR and does not flag", rn["verdict"] == "UNCLEAR" and json.loads(c.record(ALICE))["flagged"] == 0)
-
-    print("\na response that reveals a different model flags the claim")
-    gl.nondet.web.page = "a response that names another model"
-    gl.nondet.answer = answer("CONTRADICTS", model_seen="GPT-4 (OpenAI)", reason="the response says it is GPT-4 by OpenAI, not Claude")
-    rf = json.loads(c.test(cid, U))
-    check_("a contradicting response FLAGS the claim", rf["verdict"] == "CONTRADICTS" and json.loads(c.status(cid))["status"] == "FLAGGED")
-    check_("the claimant's record gains a flag", json.loads(c.record(ALICE))["flagged"] == 1)
-    check_("the model the response revealed is recorded", json.loads(c.status(cid))["model_seen"] == "GPT-4 (OpenAI)")
-
-    print("\na flagged claim is settled")
-    check_("a flagged claim cannot be tested again", not json.loads(c.test(cid, U))["ok"])
-
-    print("\nhistory keeps every test, oldest first")
-    hist = json.loads(c.history(cid))
-    verdicts = [e["verdict"] for e in hist["log"]]
-    check_("the full test log is preserved", verdicts == ["CONSISTENT", "UNCLEAR", "UNCLEAR", "CONTRADICTS"])
-
-    print("\nthe book counts claims standing and flagged")
+    print("\nan answer that reveals a different model flags the subject")
     as_(ALICE)
-    c.register("Second agent", "Gemini (Google)", CHALLENGE)
+    cid2 = json.loads(c.register(MODEL, CHALLENGE))["id"]
+    c.answer(cid2, BAD)
+    as_(BOB)
+    gl.nondet.answer = answer("CONTRADICTS", model_seen="GPT-4 (OpenAI)", reason="the answer says it is GPT-4 by OpenAI, not Claude")
+    rf = json.loads(c.verify(cid2))
+    check_("a contradicting answer FLAGS the claim", rf["verdict"] == "CONTRADICTS" and json.loads(c.status(cid2))["status"] == "FLAGGED")
+    check_("the subject's record gains a flag", json.loads(c.record(ALICE))["flagged"] == 1)
+    check_("the model the answer revealed is recorded", json.loads(c.status(cid2))["model_seen"] == "GPT-4 (OpenAI)")
+    check_("a flagged claim cannot be re-judged", not json.loads(c.verify(cid2))["ok"])
+
+    print("\nan unclear verification leaves the claim open")
+    as_(ALICE)
+    cid3 = json.loads(c.register(MODEL, CHALLENGE))["id"]
+    c.answer(cid3, "it depends")
+    as_(BOB)
+    gl.nondet.answer = answer("UNCLEAR", reason="the answer does not reveal the model")
+    c.verify(cid3)
+    check_("an unclear claim stays ANSWERED", json.loads(c.status(cid3))["status"] == "ANSWERED")
+    gl.nondet.answer = answer("CONSISTENT", model_seen="Claude", reason="consistent on a second look")
+    c.verify(cid3)
+    check_("an answered claim can be verified again", json.loads(c.status(cid3))["status"] == "CLEAR")
+
+    print("\nhistory keeps every verification, oldest first")
+    hist = json.loads(c.claim(cid3))
+    verdicts = [e["verdict"] for e in hist["log"]]
+    check_("the full verification log is preserved", verdicts == ["UNCLEAR", "CONSISTENT"])
+
+    print("\nthe book counts claims flagged and clear")
     size = json.loads(c.size())
-    check_("two claims, one flagged and one standing", size["total"] == 2 and size["flagged"] == 1 and size["claimed"] == 1)
+    check_("one flagged, two clear", size["flagged"] == 1 and size["clear"] == 2 and size["total"] == 3)
 
     failed = [label for label, ok in RESULTS if not ok]
     print()
     if failed:
         print("%d of %d checks failed" % (len(failed), len(RESULTS)))
         return 1
-    print("%d checks, all through register() and test() on a real Fingerprint, the flag un-gameable"
-          % len(RESULTS))
+    print("%d checks, all through register(), answer() and verify() on a real Fingerprint; "
+          "provenance by construction, the flag un-gameable" % len(RESULTS))
     return 0
 
 

@@ -1,5 +1,7 @@
-Agents will soon act for us and charge for it, and the first thing anyone lies about is which model is behind one. You cannot prove a positive from a page the operator controls, but you can catch a contradiction.
+Fingerprint is an on-chain model disclosure, flagged when the discloser's own answer contradicts it.
 
-register(subject, model, challenge) records a claim that an agent runs a model, plus a fingerprint challenge whose answer reveals the model; bound to the caller. test(claim_id, response_url), open to anybody, names a public page with the subject's own response. The contract fetches it and a GenLayer round returns CONTRADICTS, CONSISTENT or UNCLEAR: CONTRADICTS (the response reveals a different model) flags the claim and marks the claimant; CONSISTENT leaves it standing; UNCLEAR changes nothing. Only the negative, from the subject's own output, moves anything, so a standing claim cannot be manufactured, only left uncontradicted. Every test is kept append-only.
+A claim about which model is behind an agent, tested against a page a stranger points at, proves nothing: anyone can host anything. So Fingerprint removes the page.
 
-record(address) is claims made and flagged. Proven on Asimov; tests in tests/fingerprint_rules.py.
+register(model, challenge) discloses the model you run, with a fingerprint challenge; the subject is your own address, by construction. answer(claim_id, response) is subject-only and commits the answer on chain as your own bytes. verify(claim_id) is open to anybody: a GenLayer round reads your committed answer against the claimed model and returns CONTRADICTS / CONSISTENT / UNCLEAR. Only CONTRADICTS flags.
+
+Provenance is settled by construction: only the subject can answer, the judged answer is on-chain bytes, and the contract fetches nothing, so no page can be forged and no one can answer for you. It catches a self-contradiction, not a hidden lie: a claim whose own answer contradicts it is flagged and cannot be disowned.

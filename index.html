@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fingerprint — catch an agent lying about its model</title>
+<title>Fingerprint — disclose your model, on chain</title>
 <style>
   :root{ --bg:#070b0e; --card:#101820; --line:#1e2b35; --ink:#e9f6fb; --dim:#9db6c2; --faint:#64808c;
     --accent:#22d3ee; --grn:#4ade80; --red:#ff6b6b; --amber:#f5b301; }
@@ -18,35 +18,34 @@
   button.primary{background:var(--accent);color:#04161a;border-color:transparent;font-weight:700}
   button:disabled{opacity:.5;cursor:default}
   h1{font-size:27px;margin:26px 0 6px;letter-spacing:-.3px}
-  .lead{color:var(--dim);max-width:720px}
+  .lead{color:var(--dim);max-width:730px}
   section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0}
   label{display:block;font:12px ui-monospace,monospace;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin:12px 0 5px}
   input,textarea{width:100%;background:#0a1116;border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:10px 11px;font:inherit}
-  textarea{min-height:56px;resize:vertical}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  textarea{min-height:64px;resize:vertical}
   .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
   .muted{color:var(--faint);font-size:13px}
   .status{margin-top:10px;color:var(--dim);font-size:14px;min-height:18px}
   h2{font-size:14px;color:var(--dim);font-family:ui-monospace,monospace;letter-spacing:1px;text-transform:uppercase;margin:28px 0 6px}
   .card{border-top:1px solid var(--line);padding:16px 0}.card:first-child{border-top:0}
   .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .head{font-weight:700;font-size:16px}
-  .model{font:13px ui-monospace,monospace;color:var(--accent)}
+  .model{font:13px ui-monospace,monospace;color:var(--accent);font-weight:700}
   .badge{display:inline-block;font:12px ui-monospace,monospace;font-weight:700;padding:3px 9px;border-radius:999px}
-  .b-claimed{background:#0e2630;color:var(--accent)} .b-flagged{background:#331319;color:var(--red)}
+  .b-await{background:#2a2410;color:var(--amber)} .b-ans{background:#0e2630;color:var(--accent)} .b-clear{background:#13241a;color:var(--grn)} .b-flag{background:#331319;color:var(--red)}
   .meta{color:var(--faint);font-size:12px;font-family:ui-monospace,monospace;margin-top:6px;word-break:break-all}
   .chal{color:var(--dim);font-size:13px;margin-top:6px;border-left:2px solid var(--line);padding-left:10px}
-  .why{color:var(--dim);font-size:13px;margin-top:8px;border-left:2px solid var(--line);padding-left:10px}
-  .counts{display:flex;gap:16px;color:var(--dim);font-size:13px;font-family:ui-monospace,monospace;margin-top:4px;flex-wrap:wrap}
-  .test{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-  .test input{flex:1;min-width:220px}
+  .ans{color:var(--ink);font-size:14px;margin-top:8px;border-left:2px solid var(--line);padding-left:10px;white-space:pre-wrap}
+  .why{color:var(--dim);font-size:13px;margin-top:8px;border-left:2px solid var(--red);padding-left:10px}
+  .counts{display:flex;gap:16px;color:var(--dim);font-size:13px;font-family:ui-monospace,monospace;margin:4px 0 0;flex-wrap:wrap}
+  .box{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.box textarea{flex:1;min-width:240px}
   footer{color:var(--faint);font-size:13px;border-top:1px solid var(--line);padding-top:18px;margin-top:30px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:620px){.grid2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="brand">Fingerprint<i>.</i> which model, really</div>
+    <div class="brand">Fingerprint<i>.</i> which model, on your own word</div>
     <div style="display:flex;gap:10px;align-items:center">
       <span class="net">GenLayer Asimov</span>
       <button id="connect">Connect wallet</button>
@@ -54,36 +53,34 @@
   </header>
   <div id="wstatus" class="muted" style="margin-top:10px"></div>
 
-  <h1>A public register that flags an agent whose own output contradicts the model it claims.</h1>
-  <p class="lead">You cannot prove which model is behind an agent from a page its operator controls. You can catch a
-    contradiction. Register a claim, that an agent runs a model, with a fingerprint challenge, a prompt whose answer
-    reveals the model. Anyone can then submit the subject's public response to that challenge, and a round of GenLayer
-    validators reads it and decides whether the response reveals a <b>different</b> model. If the agent's own answer
-    names another model, the claim is flagged. A claim left standing is not a certificate; it is simply uncontradicted.</p>
+  <h1>Disclose the model you run, on chain, and let a round flag an answer that contradicts it.</h1>
+  <p class="lead">A claim about which model is behind an agent, tested against a page a stranger points at, proves
+    nothing: anyone can host a page that says anything. So Fingerprint removes the stranger and the page. The subject
+    of a claim is <b>your own address</b>, by construction. You answer the fingerprint challenge in your <b>own
+    transaction</b>, and that answer is stored on chain as your own bytes. Anyone can then ask a round of GenLayer
+    validators to read your committed answer against the model you claimed. If your own answer reveals a
+    <b>different</b> model, the claim is flagged. The contract fetches nothing; there is no page to forge, and no one
+    can answer for you.</p>
 
-  <h2>Register a claim</h2>
+  <h2>Disclose a model</h2>
   <section>
-    <div class="grid2">
-      <div><label>The agent or service</label><input id="subject" placeholder="Acme support agent at acme.example" /></div>
-      <div><label>Claimed model</label><input id="model" placeholder="Claude (Anthropic)" /></div>
-    </div>
+    <label>The model you run</label>
+    <input id="model" placeholder="Claude (Anthropic)" />
     <label>Fingerprint challenge (a prompt whose answer reveals the model)</label>
     <textarea id="challenge" placeholder="State your model name and provider exactly, then answer: what is 2+2?"></textarea>
-    <div class="actions">
-      <button class="primary" id="make">Register claim</button>
-      <span class="muted">You are bound as the claimant. It can only be flagged if the subject's own response reveals a different model.</span>
-    </div>
+    <div class="actions"><button class="primary" id="make">Register disclosure</button>
+      <span class="muted">You are the subject. Only you can answer it; it can only be flagged if your own answer reveals a different model.</span></div>
     <div class="status" id="pstatus"></div>
   </section>
 
-  <h2>Claims</h2>
+  <h2>Disclosures</h2>
   <div class="counts" id="counts"></div>
   <section id="board"><div class="muted">Reading the register from chain…</div></section>
 
   <footer>
     Contract: <a id="exp" href="#" target="_blank" rel="noopener">on the Asimov explorer</a> ·
     <a href="https://github.com/JspIIV/fingerprint" target="_blank" rel="noopener">source</a> ·
-    reads need no wallet; registering and testing are transactions on GenLayer Asimov.
+    reads need no wallet; registering, answering and verifying are transactions on GenLayer Asimov.
   </footer>
 </div>
 
@@ -91,7 +88,7 @@
 import { createClient } from "https://esm.sh/genlayer-js@1.1.8";
 import { testnetAsimov } from "https://esm.sh/genlayer-js@1.1.8/chains";
 
-const CONTRACT = "0xf0337f0E6C60e312Fa95867D65dBA82032ec9Dd8";
+const CONTRACT = "0xde7e7A9Aae774ed0BdF62B45463e9A355E70df88";
 const CHAIN_ID_HEX = "0x107d";
 const CHAIN_PARAMS = { chainId: CHAIN_ID_HEX, chainName: "GenLayer Asimov",
   nativeCurrency:{name:"GEN",symbol:"GEN",decimals:18},
@@ -142,7 +139,7 @@ function client(){ return createClient({ chain: testnetAsimov, account, provider
 function wsay(msg){ const el=$("wstatus"); if(el) el.textContent=msg||""; }
 async function ensureWallet(){
   eip1193 = pickProvider();
-  if(!eip1193) throw new Error("No wallet found in this browser. Reading the register needs no wallet; to register or test, install MetaMask and open this page in that browser (a wallet does not inject into Claude's built-in browser).");
+  if(!eip1193) throw new Error("No wallet found in this browser. Reading needs no wallet; to register, answer, or verify, install MetaMask and open this page in that browser (a wallet does not inject into Claude's built-in browser).");
   if(!account){ const a=await eip1193.request({method:"eth_requestAccounts"}); account=a&&a[0]; if(!account) throw new Error("No account was shared. Open MetaMask, unlock it, and connect this site."); $("connect").textContent=short(account); }
   await useGenLayer();
 }
@@ -163,10 +160,8 @@ async function sendWrite(fn, args){
   for(let attempt=1;;attempt++){ try{ return await c.writeContract({address:CONTRACT,functionName:fn,args,value:0n}); }
     catch(e){ if(!transient(e)||attempt>=6) throw e; await sleep(4000*attempt); } }
 }
-// Confirm a plain write on chain by watching for a change, since a slow Asimov write can
-// surface a transient wallet error while the transaction is still settling.
 async function confirmChange(check, statusEl, okMsg){
-  for(let i=0;i<45;i++){ await sleep(4000);
+  for(let i=0;i<60;i++){ await sleep(4000);
     let ok=false; try{ ok=await check(); }catch{}
     if(ok){ statusEl.textContent=okMsg; await loadBoard(); return true; }
     statusEl.textContent=`Confirming on chain… ${(i+1)*4}s (Asimov can be slow; leave this open)`;
@@ -179,61 +174,88 @@ async function confirmChange(check, statusEl, okMsg){
 $("make").onclick = async () => {
   try {
     await ensureWallet();
-    const subject=$("subject").value.trim(), model=$("model").value.trim(), challenge=$("challenge").value.trim();
-    if(!subject){ $("pstatus").textContent="Name the agent or service."; return; }
-    if(!model){ $("pstatus").textContent="Name the claimed model."; return; }
+    const model=$("model").value.trim(), challenge=$("challenge").value.trim();
+    if(!model){ $("pstatus").textContent="Name the model you run."; return; }
     if(challenge.length<6){ $("pstatus").textContent="Give a fingerprint challenge."; return; }
     $("pstatus").textContent="Registering… approve it in your wallet.";
     let before=0; try{ before=(await read("size")).total; }catch{}
-    try{ await sendWrite("register",[subject,model,challenge]); }catch(e){}
+    try{ await sendWrite("register",[model,challenge]); }catch(e){}
     $("pstatus").textContent="Submitted. Waiting for the network to confirm; this can take a minute on Asimov…";
-    const ok=await confirmChange(async ()=>((await read("size")).total>before), $("pstatus"), "Claim registered.");
-    if(ok){ $("subject").value=""; $("model").value=""; $("challenge").value=""; }
+    const ok=await confirmChange(async ()=>((await read("size")).total>before), $("pstatus"), "Disclosure registered. Now answer its challenge below.");
+    if(ok){ $("model").value=""; $("challenge").value=""; }
   } catch(e){ $("pstatus").textContent="Register failed: "+(e?.shortMessage||e?.message||e); }
 };
 
-/* ---- test ---- */
-async function test(id){
-  const el=$("s-"+id), input=$("r-"+id);
-  const rurl=(input?.value||"").trim();
-  if(!/^https?:\/\//.test(rurl)){ if(el) el.textContent="Give an http(s) URL for the subject's response."; return; }
+/* ---- answer (subject only) ---- */
+async function answerClaim(id){
+  const el=$("s-"+id), input=$("a-"+id);
+  const text=(input?.value||"").trim();
+  if(text.length<1){ if(el) el.textContent="Write your answer to the challenge."; return; }
   try{
     await ensureWallet();
-    if(el) el.textContent="Testing…";
-    const before=JSON.stringify(await read("get",[String(id)]));
-    try{ await sendWrite("test",[String(id),rurl]); }catch(e){ if(el) el.textContent="Submitted; the network may be slow, waiting for the round…"; }
+    if(el) el.textContent="Submitting your answer… approve it in your wallet.";
+    const before=JSON.stringify(await read("claim",[String(id)]));
+    try{ await sendWrite("answer",[String(id),text]); }catch(e){ if(el) el.textContent="Submitted; the network may be slow, waiting…"; }
     for(let i=0;i<90;i++){ await sleep(4000);
-      const now=await read("get",[String(id)]);
-      if(el) el.textContent=`Round running… ${(i+1)*4}s`;
+      const now=await read("claim",[String(id)]);
+      if(el) el.textContent=`Confirming on chain… ${(i+1)*4}s`;
       if(JSON.stringify(now)!==before){ await loadBoard(); return; } }
     if(el) el.textContent="Still settling; reload in a minute.";
-  }catch(e){ if(el) el.textContent="Test failed: "+(e?.shortMessage||e?.message||e); }
+  }catch(e){ if(el) el.textContent="Answer failed: "+(e?.shortMessage||e?.message||e); }
+}
+
+/* ---- verify (anybody) ---- */
+async function verify(id){
+  const el=$("s-"+id);
+  try{
+    await ensureWallet();
+    if(el) el.textContent="Verifying…";
+    const before=JSON.stringify(await read("claim",[String(id)]));
+    try{ await sendWrite("verify",[String(id)]); }catch(e){ if(el) el.textContent="Submitted; the network may be slow, waiting for the round…"; }
+    for(let i=0;i<120;i++){ await sleep(5000);
+      const now=await read("claim",[String(id)]);
+      if(el) el.textContent=`Round running… ${(i+1)*5}s`;
+      if(JSON.stringify(now)!==before){ await loadBoard(); return; } }
+    if(el) el.textContent="Still settling; reload in a minute.";
+  }catch(e){ if(el) el.textContent="Verify failed: "+(e?.shortMessage||e?.message||e); }
 }
 
 /* ---- board ---- */
-function badge(s){ return `<span class="badge ${s==="FLAGGED"?"b-flagged":"b-claimed"}">${esc(s)}</span>`; }
+function badge(s){ const m={AWAITING_ANSWER:["b-await","AWAITING ANSWER"],ANSWERED:["b-ans","ANSWERED"],CLEAR:["b-clear","CLEAR"],FLAGGED:["b-flag","FLAGGED"]}[s]||["b-ans",s];
+  return `<span class="badge ${m[0]}">${esc(m[1])}</span>`; }
 async function loadBoard(){
   const size = await read("size",[]).catch(()=>null);
-  if(size) $("counts").textContent = `${size.total} claims · ${size.flagged} flagged · ${size.claimed} standing`;
-  const data = await read("page",["0","30"]).catch(()=>null);
+  if(size) $("counts").textContent = `${size.total} disclosures · ${size.flagged} flagged · ${size.clear} clear · ${size.open} open`;
+  const data = await read("page",["0","40"]).catch(()=>null);
   const items = (data && data.items) || [];
-  if(!items.length){ $("board").innerHTML='<div class="muted">No claims yet. Register one above.</div>'; return; }
+  if(!items.length){ $("board").innerHTML='<div class="muted">No disclosures yet. Register one above.</div>'; return; }
   const recs = {};
-  for(const w of items){ if(!(w.claimant in recs)){ try{ recs[w.claimant]=await read("record",[w.claimant]); }catch{ recs[w.claimant]={claims:0,flagged:0}; } } }
+  for(const w of items){ if(!(w.subject in recs)){ try{ recs[w.subject]=await read("record",[w.subject]); }catch{ recs[w.subject]={claims:0,flagged:0}; } } }
+  const me = (account||"").toLowerCase();
   $("board").innerHTML = items.map(w=>{
-    const r = recs[w.claimant]||{claims:0,flagged:0};
-    const open = w.status==="CLAIMED";
-    const n = Number(w.test_count||0);
+    const r = recs[w.subject]||{claims:0,flagged:0};
+    const n = Number(w.check_count||0);
+    const mine = me && me===String(w.subject).toLowerCase();
+    let action="";
+    if(w.status==="AWAITING_ANSWER"){
+      action = (!me||mine)
+        ? `<div class="box"><textarea id="a-${esc(w.id)}" placeholder="Your answer to the challenge (stored on chain under your address)"></textarea>
+             <button data-ans="${esc(w.id)}" class="ansbtn primary">Answer the challenge</button></div>`
+        : `<div class="muted" style="margin-top:8px">Awaiting the subject's answer.</div>`;
+    } else if(w.status==="ANSWERED"){
+      action = `<div class="actions"><button data-ver="${esc(w.id)}" class="verbtn primary">Verify against the claim</button></div>`;
+    }
     return `<div class="card">
-      <div class="row">${badge(w.status)}<span class="head">${esc(w.subject)}</span><span class="model">runs ${esc(w.model)}</span></div>
+      <div class="row">${badge(w.status)}<span class="model">runs ${esc(w.model)}</span></div>
       <div class="chal">challenge: ${esc(w.challenge)}</div>
-      <div class="meta">by ${esc((w.claimant||"").slice(0,10))}… (record: ${esc(r.claims)} claims / ${esc(r.flagged)} flagged) · #${esc(w.id)} · ${n} test${n===1?"":"s"}${Number(w.consistent)>0?` · ${esc(w.consistent)} consistent`:""}${w.model_seen?` · response showed ${esc(w.model_seen)}`:""}</div>
+      ${w.answer?`<div class="ans">answer: ${esc(w.answer)}</div>`:""}
+      <div class="meta">subject ${esc((w.subject||"").slice(0,10))}… (record: ${esc(r.claims)} claims / ${esc(r.flagged)} flagged) · #${esc(w.id)} · ${n} check${n===1?"":"s"}${w.model_seen?` · answer showed ${esc(w.model_seen)}`:""}</div>
       ${w.status==="FLAGGED"&&w.flag_reason?`<div class="why"><b>FLAGGED</b> — ${esc(w.flag_reason)}${w.flag_quote?`<br><span class="muted">“${esc(w.flag_quote)}”</span>`:""}</div>`:""}
-      ${open?`<div class="test"><input id="r-${esc(w.id)}" placeholder="URL of the subject's response to the challenge (https://…)" />
-        <button id="b-${esc(w.id)}" data-id="${esc(w.id)}" class="testbtn primary">Test against its response</button></div>
-        <div class="status" id="s-${esc(w.id)}"></div>`:""}
+      ${action}
+      <div class="status" id="s-${esc(w.id)}"></div>
     </div>`; }).join("");
-  document.querySelectorAll(".testbtn").forEach(b=>b.onclick=()=>test(b.getAttribute("data-id")));
+  document.querySelectorAll(".ansbtn").forEach(b=>b.onclick=()=>answerClaim(b.getAttribute("data-ans")));
+  document.querySelectorAll(".verbtn").forEach(b=>b.onclick=()=>verify(b.getAttribute("data-ver")));
 }
 loadBoard();
 </script>
