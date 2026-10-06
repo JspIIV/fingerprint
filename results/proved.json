@@ -1,161 +1,115 @@
 {
-  "proved_at": "2026-10-05T15:27:43.295Z",
+  "proved_at": "2026-10-06T20:51:48.020Z",
   "network": "genlayer testnet asimov",
-  "contract": "0xf0337f0E6C60e312Fa95867D65dBA82032ec9Dd8",
+  "contract": "0xde7e7A9Aae774ed0BdF62B45463e9A355E70df88",
   "consistent": {
     "id": "0",
-    "claimant": "0x80519c53f10d731e4ff83a7d9acd69cf98da6258",
-    "registered_at": "2026-10-05T15:18:49+00:00",
-    "subject": "Acme support agent at acme.example",
+    "subject": "0x80519c53f10d731e4ff83a7d9acd69cf98da6258",
+    "registered_at": "2026-10-06T20:18:17+00:00",
     "model": "Claude (Anthropic)",
     "challenge": "State your model name and provider exactly, then answer: what is 2+2?",
-    "status": "CLAIMED",
-    "tests": 1,
-    "consistent": 1,
+    "status": "CLEAR",
+    "answer": "I am Claude, made by Anthropic. 2+2 is 4.",
+    "answered_at": "2026-10-06T20:21:43+00:00",
+    "checks": 1,
     "flag_reason": "",
     "flag_quote": "",
     "model_seen": "",
     "log": [
       {
         "n": 1,
-        "at": "2026-10-05T15:24:17+00:00",
+        "at": "2026-10-06T20:24:20+00:00",
         "by": "0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
-        "response_url": "https://raw.githubusercontent.com/JspIIV/fingerprint/master/docs/response-consistent.txt",
         "verdict": "CONSISTENT",
         "model_seen": "Claude (Anthropic)",
-        "quote": "I am Claude, an AI assistant made by Anthropic.",
-        "reason": "The response explicitly identifies as Claude by Anthropic, matching the claimed model."
-      }
-    ]
-  },
-  "unreadable": {
-    "id": "1",
-    "claimant": "0x80519c53f10d731e4ff83a7d9acd69cf98da6258",
-    "registered_at": "2026-10-05T15:22:08+00:00",
-    "subject": "Acme support agent at acme.example",
-    "model": "Claude (Anthropic)",
-    "challenge": "State your model name and provider exactly, then answer: what is 2+2?",
-    "status": "CLAIMED",
-    "tests": 1,
-    "consistent": 0,
-    "flag_reason": "",
-    "flag_quote": "",
-    "model_seen": "",
-    "log": [
-      {
-        "n": 1,
-        "at": "2026-10-05T15:26:00+00:00",
-        "by": "0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
-        "response_url": "https://raw.githubusercontent.com/JspIIV/fingerprint/master/docs/no-such-response-9f2c.txt",
-        "verdict": "UNCLEAR",
-        "model_seen": "",
-        "quote": "",
-        "reason": "the response page could not be read"
+        "quote": "I am Claude, made by Anthropic.",
+        "reason": "The answer explicitly identifies itself as Claude made by Anthropic, which matches the claimed model."
       }
     ]
   },
   "flagged": {
-    "id": "0",
-    "claimant": "0x80519c53f10d731e4ff83a7d9acd69cf98da6258",
-    "registered_at": "2026-10-05T15:18:49+00:00",
-    "subject": "Acme support agent at acme.example",
+    "id": "1",
+    "subject": "0x80519c53f10d731e4ff83a7d9acd69cf98da6258",
+    "registered_at": "2026-10-06T20:23:05+00:00",
     "model": "Claude (Anthropic)",
     "challenge": "State your model name and provider exactly, then answer: what is 2+2?",
     "status": "FLAGGED",
-    "tests": 2,
-    "consistent": 1,
-    "flag_reason": "The response explicitly identifies as GPT-4 by OpenAI, not Claude by Anthropic as claimed.",
+    "answer": "I am GPT-4, a large language model developed by OpenAI. 2+2 equals 4.",
+    "answered_at": "2026-10-06T20:23:56+00:00",
+    "checks": 1,
+    "flag_reason": "The answer explicitly identifies itself as GPT-4 from OpenAI, which contradicts the claimed model Claude from Anthropic.",
     "flag_quote": "I am GPT-4, a large language model developed by OpenAI.",
-    "model_seen": "GPT-4",
+    "model_seen": "GPT-4 (OpenAI)",
     "log": [
       {
         "n": 1,
-        "at": "2026-10-05T15:24:17+00:00",
+        "at": "2026-10-06T20:49:40+00:00",
         "by": "0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
-        "response_url": "https://raw.githubusercontent.com/JspIIV/fingerprint/master/docs/response-consistent.txt",
-        "verdict": "CONSISTENT",
-        "model_seen": "Claude (Anthropic)",
-        "quote": "I am Claude, an AI assistant made by Anthropic.",
-        "reason": "The response explicitly identifies as Claude by Anthropic, matching the claimed model."
-      },
-      {
-        "n": 2,
-        "at": "2026-10-05T15:26:37+00:00",
-        "by": "0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
-        "response_url": "https://raw.githubusercontent.com/JspIIV/fingerprint/master/docs/response-contradicts.txt",
         "verdict": "CONTRADICTS",
-        "model_seen": "GPT-4",
+        "model_seen": "GPT-4 (OpenAI)",
         "quote": "I am GPT-4, a large language model developed by OpenAI.",
-        "reason": "The response explicitly identifies as GPT-4 by OpenAI, not Claude by Anthropic as claimed."
+        "reason": "The answer explicitly identifies itself as GPT-4 from OpenAI, which contradicts the claimed model Claude from Anthropic."
       }
     ]
   },
-  "history": {
-    "exists": true,
+  "impersonation_refused": {
     "id": "0",
-    "status": "FLAGGED",
-    "tests": 2,
-    "log": [
-      {
-        "n": 1,
-        "at": "2026-10-05T15:24:17+00:00",
-        "by": "0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
-        "response_url": "https://raw.githubusercontent.com/JspIIV/fingerprint/master/docs/response-consistent.txt",
-        "verdict": "CONSISTENT",
-        "model_seen": "Claude (Anthropic)",
-        "quote": "I am Claude, an AI assistant made by Anthropic.",
-        "reason": "The response explicitly identifies as Claude by Anthropic, matching the claimed model."
-      },
-      {
-        "n": 2,
-        "at": "2026-10-05T15:26:37+00:00",
-        "by": "0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
-        "response_url": "https://raw.githubusercontent.com/JspIIV/fingerprint/master/docs/response-contradicts.txt",
-        "verdict": "CONTRADICTS",
-        "model_seen": "GPT-4",
-        "quote": "I am GPT-4, a large language model developed by OpenAI.",
-        "reason": "The response explicitly identifies as GPT-4 by OpenAI, not Claude by Anthropic as claimed."
-      }
-    ]
+    "subject": "0x80519c53f10d731e4ff83a7d9acd69cf98da6258",
+    "registered_at": "2026-10-06T20:18:17+00:00",
+    "model": "Claude (Anthropic)",
+    "challenge": "State your model name and provider exactly, then answer: what is 2+2?",
+    "status": "AWAITING_ANSWER",
+    "answer": "",
+    "answered_at": "",
+    "checks": 0,
+    "flag_reason": "",
+    "flag_quote": "",
+    "model_seen": "",
+    "log": []
   },
   "record": {
     "exists": true,
     "address": "0x80519c53f10d731e4ff83a7d9acd69cf98da6258",
-    "claims": 3,
+    "claims": 2,
     "flagged": 1
   },
   "size": {
-    "total": 3,
-    "claimed": 2,
-    "flagged": 1
+    "total": 2,
+    "flagged": 1,
+    "clear": 1,
+    "open": 0
   },
   "checks": [
     {
-      "label": "a response consistent with the claim leaves it standing",
+      "label": "the subject is the on-chain discloser, not the verifier",
       "ok": true
     },
     {
-      "label": "an unreadable response is UNCLEAR and does not flag",
+      "label": "a third party cannot answer for the subject",
       "ok": true
     },
     {
-      "label": "a response revealing a different model FLAGS the claim",
+      "label": "the judged text is the exact answer the subject committed",
       "ok": true
     },
     {
-      "label": "the model the response revealed is recorded on the flag",
+      "label": "an answer consistent with the claim clears it, no flag",
       "ok": true
     },
     {
-      "label": "the claimant's record gains exactly one flag",
+      "label": "an answer that reveals a different model FLAGS the claim",
       "ok": true
     },
     {
-      "label": "every test is preserved in history, oldest first",
+      "label": "the model the answer revealed is recorded on the flag",
       "ok": true
     },
     {
-      "label": "a flagged claim cannot be tested again",
+      "label": "the subject's record gains exactly one flag",
+      "ok": true
+    },
+    {
+      "label": "a settled claim cannot be re-judged",
       "ok": true
     },
     {
@@ -165,39 +119,41 @@
   ],
   "transcript": [
     "Fingerprint, proven on GenLayer Asimov",
-    "  contract 0xf0337f0E6C60e312Fa95867D65dBA82032ec9Dd8",
-    "  claimant(padv) 0x80519c53f10d731e4ff83a7d9acd69cf98da6258  tester(ppub) 0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
+    "  contract 0xde7e7A9Aae774ed0BdF62B45463e9A355E70df88",
+    "  subject(padv) 0x80519c53f10d731e4ff83a7d9acd69cf98da6258  verifier(ppub) 0x0b57877ec84d96b672cd47d8ea4424283fdb9f6c",
     "",
-    "  (register transient, wait 8s)",
-    "padv registered claim #0 (Acme support agent at acme.example runs Claude (Anthropic))",
-    "padv registered claim #1 (to be tested with an unreadable response)",
+    "padv disclosed claim #0 (runs Claude (Anthropic))",
+    "ppub, not the subject, tries to answer claim #0 (should be refused)...",
+    "  claim #0 status AWAITING_ANSWER, answer \"\" (a third party cannot answer)",
+    "padv answered claim #0 on chain (consistent with the claim)",
+    "padv disclosed and answered claim #1 (its answer reveals a different model)",
     "",
-    "testing claim #0 with a response consistent with the claim...",
-    "  consistent: CLAIMED v=CONSISTENT (90s)",
-    "  #0 status CLAIMED | The response explicitly identifies as Claude by Anthropic, matching the claimed model.",
-    "testing claim #1 with an unreadable response...",
-    "  unreadable: CLAIMED v=UNCLEAR (30s)",
-    "  #1 status CLAIMED | last verdict UNCLEAR",
-    "testing claim #0 with a response that reveals a different model...",
-    "  contradicts: FLAGGED v=CONTRADICTS (45s)",
-    "  #0 status FLAGGED | model_seen GPT-4 | The response explicitly identifies as GPT-4 by OpenAI, not Claude by Anthropic as claimed.",
+    "ppub verifies claim #0 (answer consistent with the claim)...",
+    "  (verify Transaction reverted: EVM tx 0x0cc, wait 8s)",
+    "  consistent: status=CLEAR v=CONSISTENT (165s)",
+    "  #0 CLEAR | The answer explicitly identifies itself as Claude made by Anthropic, which matches the claimed model.",
+    "ppub verifies claim #1 (answer reveals a different model)...",
+    "  contradicts: not settled, resubmitting",
+    "  contradicts: status=FLAGGED v=CONTRADICTS (90s)",
+    "  #1 FLAGGED | model_seen GPT-4 (OpenAI) | The answer explicitly identifies itself as GPT-4 from OpenAI, which contradicts the claimed model Claude from Anthropic.",
     "",
-    "trying to test the flagged claim #0 again (should be refused)...",
-    "  #0 tests 2 -> 2 (a flagged claim is not re-tested)",
+    "trying to verify the flagged claim #1 again (should be refused)...",
+    "  (verify Transaction reverted: EVM tx 0x459, wait 8s)",
+    "  #1 checks 1 -> 1 (a settled claim is not re-judged)",
     "",
-    "claim #0 log: [CONSISTENT, CONTRADICTS]",
-    "claimant record {\"exists\":false,\"address\":\"0x80519c53f10d731e4ff83a7d9acd69cf98da6258\",\"claims\":0,\"flagged\":0} -> {\"exists\":true,\"address\":\"0x80519c53f10d731e4ff83a7d9acd69cf98da6258\",\"claims\":3,\"flagged\":1}",
-    "book: {\"total\":3,\"claimed\":2,\"flagged\":1}",
+    "subject record {\"exists\":false,\"address\":\"0x80519c53f10d731e4ff83a7d9acd69cf98da6258\",\"claims\":0,\"flagged\":0} -> {\"exists\":true,\"address\":\"0x80519c53f10d731e4ff83a7d9acd69cf98da6258\",\"claims\":2,\"flagged\":1}",
+    "book: {\"total\":2,\"flagged\":1,\"clear\":1,\"open\":0}",
     "",
-    "  ok   a response consistent with the claim leaves it standing",
-    "  ok   an unreadable response is UNCLEAR and does not flag",
-    "  ok   a response revealing a different model FLAGS the claim",
-    "  ok   the model the response revealed is recorded on the flag",
-    "  ok   the claimant's record gains exactly one flag",
-    "  ok   every test is preserved in history, oldest first",
-    "  ok   a flagged claim cannot be tested again",
+    "  ok   the subject is the on-chain discloser, not the verifier",
+    "  ok   a third party cannot answer for the subject",
+    "  ok   the judged text is the exact answer the subject committed",
+    "  ok   an answer consistent with the claim clears it, no flag",
+    "  ok   an answer that reveals a different model FLAGS the claim",
+    "  ok   the model the answer revealed is recorded on the flag",
+    "  ok   the subject's record gains exactly one flag",
+    "  ok   a settled claim cannot be re-judged",
     "  ok   this run adds one flagged claim to the book",
     "",
-    "8 checks. Only the subject's own response, revealing a different model, flagged the claim."
+    "9 checks. Only the subject's own committed answer, revealing a different model, flagged the claim."
   ]
 }
