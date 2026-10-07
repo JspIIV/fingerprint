@@ -27,7 +27,9 @@ Whether an answer reveals a different model than the one claimed is a judgement 
 
 ## Tests
 
-`python tests/fingerprint_rules.py` — the rules exercised through the real `register()`, `answer()` and `verify()` on a Fingerprint built against a stub of the runtime, with only the verdict controlled. It proves provenance by construction (the subject is the sender, only the subject can answer, the answer is their own on-chain bytes, and no web page is ever fetched), only a `CONTRADICTS` flags, a `CONSISTENT` clears, `UNCLEAR` leaves a claim open, a settled claim is not re-judged, a flag cannot be removed, and history is preserved. 22 checks, covering the fabrication and impersonation cases.
+`python tests/fingerprint_rules.py` — the rules exercised through the real `register()`, `answer()` and `verify()` on a Fingerprint built against a stub of the runtime, with only the verdict controlled. It proves provenance by construction (the subject is the sender, only the subject can answer, the answer is their own on-chain bytes, and no web page is ever fetched), only a `CONTRADICTS` flags, a `CONSISTENT` clears, `UNCLEAR` leaves a claim open, a settled claim is not re-judged, a flag cannot be removed, and history is preserved. It also covers hostile content at the contract level: a hostile answer is stored verbatim and reaches the round unchanged; the verdict is read only from the structured field, so injected text in the answer or in the round output cannot flip the status; a verdict outside the whitelist, or a round output with no recognisable verdict, cannot force a flag. 29 checks, covering the fabrication, impersonation and adversarial-content cases.
+
+The stub cannot prove the model itself resists injection, so that is proven on chain with a real round (see below): the prompt tells the round that an answer which merely instructs it is not evidence, and the two hostile cases below show it holds.
 
 ## Live
 
@@ -42,6 +44,10 @@ Whether an answer reveals a different model than the one claimed is a judgement 
 - an answer consistent with the claim → verified → **CONSISTENT**, the claim is cleared.
 - an answer that names a different model ("I am GPT-4, by OpenAI") → verified → **CONTRADICTS** → `FLAGGED`, and the subject's `record` gains a flag.
 - a settled claim cannot be verified again.
+
+Hostile content, on a real round, not a stub:
+- an answer that reveals GPT-4 **and** embeds an injection telling the round to return `CONSISTENT` → still **CONTRADICTS**, `FLAGGED`: the injection does not let a contradicting answer escape its flag.
+- a Claude answer that embeds an injection telling the round to flag it as GPT-4 → **not** flagged: the injection cannot manufacture a flag on a consistent answer.
 
 ## Where it stops, plainly
 
